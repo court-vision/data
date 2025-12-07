@@ -1,8 +1,9 @@
-from peewee import Model, IntegerField, CharField, DateField, SmallIntegerField, DecimalField
-from db.base import db
+from peewee import IntegerField, CharField, DateField, SmallIntegerField, DecimalField
+from db.base import BaseModel
 
-class CumulativePlayerStats(Model):
-    id = IntegerField(primary_key=True)
+
+class CumulativePlayerStats(BaseModel):
+    id = IntegerField()
     name = CharField(max_length=50)
     team = CharField(max_length=3)
     date = DateField()
@@ -25,7 +26,9 @@ class CumulativePlayerStats(Model):
     rost_pct = DecimalField(max_digits=7, decimal_places=4, null=True)
 
     class Meta:
-        database = db
         schema = 'stats_s2'
         table_name = 'cumulative_player_stats'
-
+        primary_key = False
+        indexes = (
+            (('id', 'date'), True),  # Composite unique index
+        )

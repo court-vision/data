@@ -1,2 +1,5 @@
 **/__pycache__/*
 .DS_Store
+.venv
+secrets.env
+data_platform.egg-info
