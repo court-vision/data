@@ -4,6 +4,7 @@ import requests
 from datetime import datetime, timedelta
 
 import pytz
+from peewee import fn
 
 from db.models.season2.cumulative_player_stats import CumulativePlayerStats
 from nba_api.stats.endpoints import leagueleaders
@@ -107,8 +108,6 @@ def fetch_nba_fpts_data(rostered_data: dict) -> dict:
 def get_latest_gp_by_player() -> dict:
     """Gets the most recent GP value for each player from the database"""
     # Get the latest record for each player by finding max date per player
-    from peewee import fn
-
     subquery = (
         CumulativePlayerStats
         .select(
@@ -213,22 +212,41 @@ def main():
     CumulativePlayerStats.insert_many(entries).execute()
     print(f"Inserted {len(entries)} new rows")
 
-    # Update ranks for today's entries based on fantasy points
-    print("Calculating ranks for today's entries...")
-    todays_entries = list(
+    # Update ranks for ALL players based on their latest fantasy points
+    print("Calculating ranks for all players...")
+
+    # Get the latest entry for each player
+    subquery = (
+        CumulativePlayerStats
+        .select(
+            CumulativePlayerStats.id,
+            fn.MAX(CumulativePlayerStats.date).alias('max_date')
+        )
+        .group_by(CumulativePlayerStats.id)
+    )
+
+    # Get full records for each player's latest entry, ordered by fpts
+    latest_entries = list(
         CumulativePlayerStats
         .select()
-        .where(CumulativePlayerStats.date == date)
+        .join(
+            subquery,
+            on=(
+                (CumulativePlayerStats.id == subquery.c.id) &
+                (CumulativePlayerStats.date == subquery.c.max_date)
+            )
+        )
         .order_by(CumulativePlayerStats.fpts.desc())
     )
 
-    for i, player in enumerate(todays_entries, start=1):
+    # Update rank for each player's latest entry
+    for i, player in enumerate(latest_entries, start=1):
         CumulativePlayerStats.update(rank=i).where(
             (CumulativePlayerStats.id == player.id) &
-            (CumulativePlayerStats.date == date)
+            (CumulativePlayerStats.date == player.date)
         ).execute()
 
-    print(f"Updated ranks for {len(todays_entries)} players")
+    print(f"Updated ranks for {len(latest_entries)} players")
     print("ETL process completed successfully")
 
 
