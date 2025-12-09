@@ -2,7 +2,7 @@ from datetime import timedelta
 from datetime import datetime
 import json
 import requests
-from libs.nba_api.stats.endpoints import scoreboardv2, boxscoretraditionalv3
+from nba_api.stats.endpoints import scoreboardv2, boxscoretraditionalv3
 import pandas as pd
 from db.models.season2.daily_player_stats import DailyPlayerStats
 

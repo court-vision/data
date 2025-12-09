@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import pytz
 
 from db.models.season2.cumulative_player_stats import CumulativePlayerStats
-from libs.nba_api.stats.endpoints import leagueleaders
+from nba_api.stats.endpoints import leagueleaders
 
 
 # Configuration

@@ -1,0 +1,1 @@
+-e git+https://github.com/jameslk3/courtvision-data.git@e8f2f0c8f38b4d254c6cf430d659208b95ab9b48#egg=data_platform
